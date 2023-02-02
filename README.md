@@ -21,3 +21,7 @@ Dla każdej pobieranej kategorii, w parametrze **Title** moze być zawarta opcjo
 Na ten moment sortowanie działa nieprawidłowo, należy to poprawić.
 
 > Dla wejścia znajdującego się w pliku **input.ts**, w tym momencie funkcja zwraca takie wyjście jak w pliku **currentResult.ts**. Oczekiwane wyjście zawarte jest w pliku **correctResult.ts**
+
+## Jak używać tego repo
+
+Najważniejsza komenda dla tego zadania to **npm run test** - buduje ona TSa i odpala testy. Ta komenda się wywali jeśli kod nie przejdzie eslinta i prettiera. Zatem żeby sprawdzić swoje zadanie należy najpierw pozbyć się błędów z eslinta i odpalić **fix:prettier**.
