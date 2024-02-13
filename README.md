@@ -17,7 +17,7 @@ W pliku **mockedApi.ts** znajduje się fejkowe źródło danych i tam nie ma pot
 
 ## Na czym polega bug?
 
-Dla każdej pobieranej kategorii, w parametrze **Title** moze być zawarta opcjonalna numeracja która powinna defihttps://git.easypack24.net/inpost-fresh/opencheckout/-/merge_requests/520niować kolejność zwracaną przez funkcje (w polu **order**).
+Dla każdej pobieranej kategorii, w parametrze **Title** moze być zawarta opcjonalna numeracja która powinna definiować kolejność zwracaną przez funkcje (w polu **order**).
 Na ten moment sortowanie działa nieprawidłowo, należy to poprawić.
 
 > Dla wejścia znajdującego się w pliku **input.ts**, w tym momencie funkcja zwraca takie wyjście jak w pliku **currentResult.ts**. Oczekiwane wyjście zawarte jest w pliku **correctResult.ts**
