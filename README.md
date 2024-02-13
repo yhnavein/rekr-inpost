@@ -8,16 +8,16 @@ W pliku **mockedApi.ts** znajduje się fejkowe źródło danych i tam nie ma pot
 
 ## Co należy zrobić?
 
-1. Refactor funkcji categoryTree. Wszystkie chwyty dozwolone. Dzielenie funkcji, wynoszenie zależności, zmiana parametrów wejściowych, etc... Jedyne co powinno zostać tak jak jest to że plik 
-**task.ts** exportuje jedną funkcję i zwraca ona ten sam typ co przed refaktorem (lub inną funkcję która zwróci ten typ, tak tez może być.)
-2. Poprawiony zostanie bug opisany poniżej.
-3. W osobnym pliku przeprowadzony zostanie dowód (w postaci kodu) który jednoznacznie pokaże poprawność działania funkcji categoryTree.
+1. Refactor funkcji categoryTree. Wszystkie chwyty dozwolone. Dzielenie funkcji, wynoszenie zależności, zmiana parametrów wejściowych, etc...
+2. Źródło danych (funkcja getCategories) powinna być przekazywana jako zależność. W idealnym scenariuszu categoryTree opiera się na abstrakcji i nie jest świadoma co konretnie zostanie jej przekazane
+3. Poprawiony zostanie bug opisany poniżej.
+4. W osobnym pliku przeprowadzony zostanie dowód (w postaci kodu) który jednoznacznie pokaże poprawność działania funkcji categoryTree.
 
 > Wszystkie potrzebne paczki są już w tym repozytorium, aczkolwiek można użyć dowolnych.
 
 ## Na czym polega bug?
 
-Dla każdej pobieranej kategorii, w parametrze **Title** moze być zawarta opcjonalna numeracja która powinna defioniować kolejność zwracaną przez funkcje (w polu **order**).
+Dla każdej pobieranej kategorii, w parametrze **Title** moze być zawarta opcjonalna numeracja która powinna defihttps://git.easypack24.net/inpost-fresh/opencheckout/-/merge_requests/520niować kolejność zwracaną przez funkcje (w polu **order**).
 Na ten moment sortowanie działa nieprawidłowo, należy to poprawić.
 
 > Dla wejścia znajdującego się w pliku **input.ts**, w tym momencie funkcja zwraca takie wyjście jak w pliku **currentResult.ts**. Oczekiwane wyjście zawarte jest w pliku **correctResult.ts**
