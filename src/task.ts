@@ -1,96 +1,95 @@
-import { getCategories } from "./mockedApi";
+import type { CategoryListElement, RawCategory } from './types';
 
-export interface CategoryListElement {
-  name: string;
-  id: number;
-  image: string;
-  order: number;
-  children: CategoryListElement[];
-  showOnHome: boolean;
-}
+/**
+ * Method for retrieving categories data from an external source
+ * using a customizable loader function and then transforming it into
+ * a structure expected by the frontend.
+ * @param loader Function responsible for receiving the data from an external source
+ * @returns Promise containing the category tree structure or an empty array
+ */
+export const loadCategoryTree = async (
+  loader: () => Promise<RawCategory[]>
+): Promise<CategoryListElement[]> => {
+  const res = await loader();
 
-export const categoryTree = async (): Promise<CategoryListElement[]> => {
+  return getCategoryTree(res);
+};
 
-  const res = await getCategories();
-
-  if (!res.data) {
+/**
+ * Method for transforming a backend categories structure into a new one that
+ * has business rules applied (like custom ordering and showing on home page).
+ * @param categories Raw categories data from the backend
+ * @returns Transformed category tree structure
+ */
+export const getCategoryTree = (categories: RawCategory[]) => {
+  if (!categories) {
     return [];
   }
 
-  const toShowOnHome: number[] = [];
+  // If a title at the root level contains a hash, it should be shown on the home page
+  const toShowOnHome = categories
+    .filter((c) => c.Title?.includes('#'))
+    .map((c) => c.id);
 
-  let result = res.data.map((c1) => {
-    let order = c1.Title;
-    if (c1.Title && c1.Title.includes("#")) {
-      order = c1.Title.split("#")[0];
-      toShowOnHome.push(c1.id);
-    }
+  const result = processCategories(categories);
 
-    let orderL1 = parseInt(order);
-    if (isNaN(orderL1)) {
-      orderL1 = c1.id;
-    }
-    let l2Kids = c1.children
-      ? c1.children.map((c2) => {
-          let order2 = c1.Title;
-          if (c2.Title && c2.Title.includes("#")) {
-            order2 = c2.Title.split("#")[0];
-          }
-          let orderL2 = parseInt(order2);
-          if (isNaN(orderL2)) {
-            orderL2 = c2.id;
-          }
-          let l3Kids = c2.children
-            ? c2.children.map((c3) => {
-                let order3 = c1.Title;
-                if (c3.Title && c3.Title.includes("#")) {
-                  order3 = c3.Title.split("#")[0];
-                }
-                let orderL3 = parseInt(order3);
-                if (isNaN(orderL3)) {
-                  orderL3 = c3.id;
-                }
-                return {
-                  id: c3.id,
-                  image: c3.MetaTagDescription,
-                  name: c3.name,
-                  order: orderL3,
-                  children: [],
-                  showOnHome: false,
-                };
-              })
-            : [];
-          l3Kids.sort((a, b) => a.order - b.order);
-          return {
-            id: c2.id,
-            image: c2.MetaTagDescription,
-            name: c2.name,
-            order: orderL2,
-            children: l3Kids,
-            showOnHome: false,
-          };
-        })
-      : [];
-    l2Kids.sort((a, b) => a.order - b.order);
+  return applyBusinessRules(result, toShowOnHome);
+};
+
+/**
+ * Function that adjusts the category tree to match given business rules:
+ * - If there are <= 5 categories, all of them should be shown on the home page
+ * - If there are more than 5 categories, check if there are any categories
+ *   with a hash in the title and only show those on the home page
+ * - If there are no categories with a hash in the title, show the first 3 categories
+ *   on the home page
+ **/
+function applyBusinessRules(
+  categories: CategoryListElement[],
+  toShowOnHome: number[]
+): CategoryListElement[] {
+  const maxCategoriesToHightlightAll = 5;
+  const highlightFirstXElements = 3;
+
+  if (categories.length <= maxCategoriesToHightlightAll) {
+    return categories.map((x) => ({ ...x, showOnHome: true }));
+  }
+
+  if (toShowOnHome.length > 0) {
+    return categories.map((x) => ({
+      ...x,
+      showOnHome: toShowOnHome.includes(x.id),
+    }));
+  }
+
+  return categories.map((x, index) => ({
+    ...x,
+    showOnHome: index < highlightFirstXElements,
+  }));
+}
+
+/** A recursive function that processes categories and their children */
+function processCategories(categories: RawCategory[]): CategoryListElement[] {
+  const result = categories.map<CategoryListElement>((c1) => {
+    const order = getOrder(c1.Title, c1.id);
+    const children = processCategories(c1.children ?? []);
+
     return {
       id: c1.id,
       image: c1.MetaTagDescription,
       name: c1.name,
-      order: orderL1,
-      children: l2Kids,
+      order,
+      children,
       showOnHome: false,
     };
   });
-
   result.sort((a, b) => a.order - b.order);
 
-  if (result.length <= 5) {
-    result.forEach((a) => (a.showOnHome = true));
-  } else if (toShowOnHome.length > 0) {
-    result.forEach((x) => (x.showOnHome = toShowOnHome.includes(x.id)));
-  } else {
-    result.forEach((x, index) => (x.showOnHome = index < 3));
-  }
-
   return result;
-};
+}
+
+/** Extracts order by parsing `Title` and falling back to `id` */
+function getOrder(title?: string, id?: number): number {
+  const order = Number.parseInt(title, 10);
+  return order || id;
+}
